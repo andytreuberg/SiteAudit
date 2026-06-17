@@ -1,0 +1,205 @@
+@import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@700,800,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,500;0,600;1,500;1,600&family=Geist+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+/* ───────────────────────────────────────────────────────────────────────────
+   SiteAudit — a serious security/audit tool in a joyful pink Memphis coat.
+   Hot-pink ground · tomato wordmark · flat art-toy illustrations · hand-drawn
+   wobbly outlines · traffic-light scores. The only pink build in the set.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ground & structure */
+  --pink: #f49ed7;       /* bubblegum ground */
+  --pink-deep: #e879c6;  /* shadow / band */
+  --paper: #fff4e8;      /* card faces, grid ink */
+  --ink: #161112;        /* outlines, body, the code card */
+  /* identity */
+  --tomato: #f0431f;     /* huge wordmark + primary pill */
+  --orange: #ff8a3d;     /* illustration fills, gauge needle */
+  /* illustration accents */
+  --green: #1f8a50;
+  --peri: #6c63ff;
+  --cream: #fff4e8;
+  /* score states — the ONLY colors that carry audit meaning */
+  --pass: #1f8a50;
+  --warn: #f6a609;
+  --fail: #e11d2a;
+
+  --ff-display: 'Cabinet Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --ff-serif: 'Crimson Pro', Georgia, serif;
+  --ff-mono: 'Geist Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--pink);
+  color: var(--ink);
+  font-family: var(--ff-display);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ── wavy hand-drawn graph-paper ground (fixed, full-bleed) ─────────────────── */
+.grid-ground {
+  position: fixed;
+  inset: -40px;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 47px, color-mix(in srgb, var(--paper) 42%, transparent) 47px 48px),
+    repeating-linear-gradient(90deg, transparent 0 47px, color-mix(in srgb, var(--paper) 42%, transparent) 47px 48px);
+  filter: url(#wobble-soft);
+  opacity: 0.9;
+}
+.grid-ground::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(120% 90% at 50% -10%, transparent 40%, color-mix(in srgb, var(--pink-deep) 55%, transparent) 100%);
+}
+
+.wrap { position: relative; z-index: 1; }
+
+/* ── typography ─────────────────────────────────────────────────────────────── */
+.wordmark {
+  font-family: var(--ff-display);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.86;
+  color: var(--tomato);
+  text-shadow: 4px 5px 0 var(--ink);
+}
+.nav-ital { font-family: var(--ff-serif); font-style: italic; font-weight: 600; }
+.mono { font-family: var(--ff-mono); }
+.serif { font-family: var(--ff-serif); }
+
+/* ── wobble filters (applied via filter: url(#…)) ───────────────────────────── */
+.wob { filter: url(#wobble); }
+
+/* ── pills (hand-drawn double outline) ──────────────────────────────────────── */
+.pill {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 0.55em;
+  font-family: var(--ff-display); font-weight: 800;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.7em 1.4em;
+  cursor: pointer;
+  box-shadow: 0 0 0 3px var(--paper), 5px 6px 0 0 var(--ink);
+  transition: transform .12s ease, box-shadow .12s ease;
+  filter: url(#wobble);
+}
+.pill:hover { transform: translate(-1px,-2px); box-shadow: 0 0 0 3px var(--paper), 7px 9px 0 0 var(--ink); }
+.pill:active { transform: translate(2px,3px); box-shadow: 0 0 0 3px var(--paper), 2px 2px 0 0 var(--ink); }
+.pill:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.pill-primary { background: var(--tomato); color: var(--paper); }
+.pill-ink { background: var(--ink); color: var(--paper); }
+.pill-sm { font-size: 0.82rem; padding: 0.5em 1em; border-width: 2.5px; box-shadow: 0 0 0 2.5px var(--paper), 4px 5px 0 0 var(--ink); }
+
+/* ── illustration cards (cream face, ink outline, slight tilt) ──────────────── */
+.icard {
+  position: relative;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 6px 7px 0 0 var(--ink);
+  filter: url(#wobble);
+}
+.icard-flat { box-shadow: 5px 6px 0 0 var(--ink); }
+
+/* score-state edge for report tiles */
+.edge-pass { border-color: var(--pass); box-shadow: 6px 7px 0 0 var(--pass); }
+.edge-warn { border-color: var(--warn); box-shadow: 6px 7px 0 0 var(--warn); }
+.edge-fail { border-color: var(--fail); box-shadow: 6px 7px 0 0 var(--fail); }
+
+.chip {
+  font-family: var(--ff-mono); font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0.25em 0.6em; border-radius: 999px; border: 2px solid var(--ink);
+  display: inline-flex; align-items: center; gap: 0.3em;
+}
+.chip-pass { background: color-mix(in srgb, var(--pass) 18%, var(--paper)); color: var(--pass); border-color: var(--pass); }
+.chip-warn { background: color-mix(in srgb, var(--warn) 20%, var(--paper)); color: #a9730a; border-color: var(--warn); }
+.chip-fail { background: color-mix(in srgb, var(--fail) 16%, var(--paper)); color: var(--fail); border-color: var(--fail); }
+
+.sev-hi { color: var(--fail); }
+.sev-md { color: #a9730a; }
+.sev-lo { color: var(--ink); opacity: .7; }
+
+.tx-pass { color: var(--pass); }
+.tx-warn { color: #a9730a; }
+.tx-fail { color: var(--fail); }
+
+/* ── the signature STAMPED SCORE SEAL ───────────────────────────────────────── */
+.seal-wrap { position: relative; display: inline-grid; place-items: center; }
+@keyframes stamp-in {
+  0%   { transform: scale(1.5) rotate(-8deg); opacity: 0; }
+  55%  { transform: scale(0.92) rotate(-8deg); opacity: 1; }
+  75%  { transform: scale(1.06) rotate(-8deg); }
+  100% { transform: scale(1) rotate(-8deg); }
+}
+.seal-stamp { animation: stamp-in .5s cubic-bezier(.2,1.3,.4,1) both; }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.seal-scan { animation: spin-slow 2.4s linear infinite; }
+
+/* ── inputs ─────────────────────────────────────────────────────────────────── */
+.url-input {
+  font-family: var(--ff-mono); font-size: 1rem; font-weight: 500;
+  background: var(--paper); color: var(--ink);
+  border: 3px solid var(--ink); border-radius: 16px;
+  padding: 0.9em 1.1em; width: 100%;
+  box-shadow: inset 2px 2px 0 0 color-mix(in srgb, var(--ink) 12%, transparent);
+  outline: none;
+}
+.url-input::placeholder { color: color-mix(in srgb, var(--ink) 45%, transparent); }
+.url-input:focus { box-shadow: 0 0 0 3px var(--tomato); }
+
+/* ── panels ─────────────────────────────────────────────────────────────────── */
+.panel {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 26px;
+  box-shadow: 8px 10px 0 0 var(--ink);
+}
+.panel-ink { background: var(--ink); color: var(--paper); border-color: var(--ink); box-shadow: 8px 10px 0 0 var(--pink-deep); }
+
+/* code / x402 block */
+.codeblock {
+  font-family: var(--ff-mono); font-size: 0.72rem; line-height: 1.7;
+  background: #0e0b0c; color: #ffe9d6; border-radius: 14px; padding: 1rem 1.1rem;
+  overflow-x: auto; border: 2px solid color-mix(in srgb, var(--orange) 50%, var(--ink));
+}
+.codeblock .k { color: var(--orange); }
+.codeblock .g { color: #7fd4a0; }
+.codeblock .d { color: #8b8184; }
+
+/* corner nav */
+.corner { position: fixed; z-index: 30; font-family: var(--ff-serif); font-style: italic; font-weight: 600; }
+.corner a, .corner button { color: var(--ink); text-decoration: none; cursor: pointer; background: none; border: none; font: inherit; }
+.corner a:hover, .corner button:hover { color: var(--tomato); }
+
+/* modal */
+.scrim { position: fixed; inset: 0; background: color-mix(in srgb, var(--ink) 55%, transparent); z-index: 50; display: grid; place-items: center; padding: 1.2rem; }
+
+/* misc */
+.tag-rule { font-family: var(--ff-serif); font-style: italic; }
+.flat-link { color: var(--ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.flat-link:hover { color: var(--tomato); }
+.spin { animation: spin-slow 1s linear infinite; }
+.float { animation: floaty 6s ease-in-out infinite; }
+@keyframes floaty { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-7px) } }
+
+.hide-scroll::-webkit-scrollbar { display: none; }
+.hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+@media (max-width: 720px) {
+  .wordmark { text-shadow: 3px 4px 0 var(--ink); }
+  .corner { font-size: 0.8rem; }
+}

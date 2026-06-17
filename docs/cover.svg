@@ -1,0 +1,74 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="w"><feTurbulence type="fractalNoise" baseFrequency="0.014" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <path id="topArc" d="M 945,300 A 78,78 0 0 0 1101,300"/>
+    <path id="botArc" d="M 953,300 A 70,70 0 0 0 1093,300"/>
+  </defs>
+
+  <!-- ground + grid -->
+  <rect width="1200" height="630" fill="#f49ed7"/>
+  <g stroke="#fff4e8" stroke-width="1.4" opacity="0.42" filter="url(#w)">
+    <g>
+      <line x1="0" y1="48" x2="1200" y2="48"/><line x1="0" y1="96" x2="1200" y2="96"/><line x1="0" y1="144" x2="1200" y2="144"/><line x1="0" y1="192" x2="1200" y2="192"/><line x1="0" y1="240" x2="1200" y2="240"/><line x1="0" y1="288" x2="1200" y2="288"/><line x1="0" y1="336" x2="1200" y2="336"/><line x1="0" y1="384" x2="1200" y2="384"/><line x1="0" y1="432" x2="1200" y2="432"/><line x1="0" y1="480" x2="1200" y2="480"/><line x1="0" y1="528" x2="1200" y2="528"/><line x1="0" y1="576" x2="1200" y2="576"/>
+      <line x1="48" y1="0" x2="48" y2="630"/><line x1="144" y1="0" x2="144" y2="630"/><line x1="240" y1="0" x2="240" y2="630"/><line x1="336" y1="0" x2="336" y2="630"/><line x1="432" y1="0" x2="432" y2="630"/><line x1="528" y1="0" x2="528" y2="630"/><line x1="624" y1="0" x2="624" y2="630"/><line x1="720" y1="0" x2="720" y2="630"/><line x1="816" y1="0" x2="816" y2="630"/><line x1="912" y1="0" x2="912" y2="630"/><line x1="1008" y1="0" x2="1008" y2="630"/><line x1="1104" y1="0" x2="1104" y2="630"/>
+    </g>
+  </g>
+
+  <!-- top labels -->
+  <text x="56" y="58" font-family="monospace" font-size="14" letter-spacing="3" fill="#161112">SITE · AUDIT · ON-CHAIN · ARC</text>
+  <text x="1144" y="58" text-anchor="end" font-family="monospace" font-size="14" letter-spacing="3" fill="#161112">PAY 5¢ · AGENT SCANS · STAMPED</text>
+
+  <!-- wordmark -->
+  <text x="60" y="280" font-family="'Cabinet Grotesk','Arial Black',sans-serif" font-weight="900" font-size="150" letter-spacing="-6" fill="#161112">SiteAudit</text>
+  <text x="56" y="276" font-family="'Cabinet Grotesk','Arial Black',sans-serif" font-weight="900" font-size="150" letter-spacing="-6" fill="#f0431f">SiteAudit</text>
+  <text x="60" y="330" font-family="Georgia,serif" font-style="italic" font-size="30" fill="#161112">pay a few cents — an agent audits your site, on-chain.</text>
+
+  <!-- scattered illustration cards -->
+  <!-- SEO magnifier -->
+  <g transform="translate(70,388) rotate(-5)" filter="url(#w)">
+    <rect width="150" height="150" rx="20" fill="#fff4e8" stroke="#161112" stroke-width="3.4"/>
+    <rect x="26" y="22" width="62" height="80" rx="5" fill="#fff4e8" stroke="#161112" stroke-width="3"/>
+    <line x1="36" y1="40" x2="78" y2="40" stroke="#161112" stroke-width="3"/><line x1="36" y1="56" x2="68" y2="56" stroke="#161112" stroke-width="3"/><line x1="36" y1="72" x2="78" y2="72" stroke="#161112" stroke-width="3"/>
+    <circle cx="86" cy="92" r="26" fill="#ff8a3d" stroke="#161112" stroke-width="3.4"/>
+    <circle cx="86" cy="92" r="12" fill="#fff4e8" stroke="#161112" stroke-width="3"/>
+    <line x1="106" y1="112" x2="126" y2="132" stroke="#161112" stroke-width="6" stroke-linecap="round"/>
+    <text x="20" y="138" font-family="monospace" font-size="13" font-weight="600" fill="#161112">SEO</text>
+  </g>
+  <!-- Speed gauge -->
+  <g transform="translate(238,408) rotate(4)" filter="url(#w)">
+    <rect width="150" height="150" rx="20" fill="#fff4e8" stroke="#161112" stroke-width="3.4"/>
+    <path d="M30 96 A45 45 0 0 1 120 96" fill="#fff4e8" stroke="#161112" stroke-width="3.4"/>
+    <line x1="75" y1="96" x2="100" y2="58" stroke="#f0431f" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="75" cy="96" r="7" fill="#161112"/>
+    <text x="20" y="138" font-family="monospace" font-size="13" font-weight="600" fill="#161112">SPEED</text>
+  </g>
+  <!-- Security eye -->
+  <g transform="translate(406,392) rotate(-3)" filter="url(#w)">
+    <rect width="150" height="150" rx="20" fill="#fff4e8" stroke="#161112" stroke-width="3.4"/>
+    <path d="M24 75 Q75 34 126 75 Q75 116 24 75 Z" fill="#fff4e8" stroke="#161112" stroke-width="3.4"/>
+    <circle cx="75" cy="75" r="22" fill="#6c63ff" stroke="#161112" stroke-width="3.4"/>
+    <circle cx="75" cy="75" r="9" fill="#161112"/>
+    <text x="20" y="138" font-family="monospace" font-size="13" font-weight="600" fill="#161112">SECURITY</text>
+  </g>
+
+  <!-- the stamped score seal (right) -->
+  <g transform="translate(0,0) rotate(-8 1023 300)">
+    <circle cx="1023" cy="300" r="104" fill="none" stroke="#1f8a50" stroke-width="3" stroke-dasharray="2 9" filter="url(#w)"/>
+    <circle cx="1023" cy="300" r="95" fill="#fff4e8" stroke="#161112" stroke-width="3.5" filter="url(#w)"/>
+    <circle cx="1023" cy="300" r="88" fill="none" stroke="#1f8a50" stroke-width="2.5" filter="url(#w)"/>
+    <text font-family="monospace" font-size="12.5" font-weight="600" letter-spacing="3.4" fill="#161112"><textPath href="#topArc" startOffset="50%" text-anchor="middle">SITE · AUDIT · SITE · AUDIT</textPath></text>
+    <text font-family="monospace" font-size="9.5" font-weight="500" letter-spacing="2.2" fill="#1f8a50"><textPath href="#botArc" startOffset="50%" text-anchor="middle">STAMPED ON-CHAIN · keccak256</textPath></text>
+    <text x="1023" y="243" text-anchor="middle" font-size="13" fill="#1f8a50">★</text>
+    <text x="1023" y="365" text-anchor="middle" font-size="13" fill="#1f8a50">★</text>
+    <text x="1023" y="312" text-anchor="middle" font-family="monospace" font-size="58" font-weight="600" fill="#161112">87</text>
+    <text x="1023" y="336" text-anchor="middle" font-family="monospace" font-size="13" font-weight="500" fill="#161112" opacity="0.55">OUT OF 100</text>
+  </g>
+
+  <!-- decorative shapes -->
+  <path d="M620 150 l8 18 19 1 -15 13 5 19 -17 -11 -17 11 5 -19 -15 -13 19 -1 Z" fill="#ff8a3d" stroke="#161112" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M1090 470 q14 -18 28 0 q14 18 28 0" fill="none" stroke="#6c63ff" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- bottom strip -->
+  <rect x="0" y="572" width="1200" height="58" fill="#161112"/>
+  <text x="600" y="608" text-anchor="middle" font-family="monospace" font-size="15" letter-spacing="2.5" fill="#fff4e8">SEO · SPEED · SECURITY  —  native USDC on ARC · x402 audit-as-a-paid-API · keccak256 receipt</text>
+</svg>

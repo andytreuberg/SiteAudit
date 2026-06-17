@@ -1,0 +1,9 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" fill="#f49ed7"/>
+  <!-- hand-inked notary stamp: wobbly double ring + a tick -->
+  <g fill="none" stroke="#161112" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 7.5 C45 7 57 18 56.5 32 C57 46 45 57 32 56.5 C19 57 7 45 7.5 32 C7 18 19 8 32 7.5 Z"/>
+    <path d="M32 13.5 C42 13 51 21 50.5 32 C51 42 42 51 32 50.5 C22 51 13 42 13.5 32 C13 22 22 14 32 13.5 Z"/>
+  </g>
+  <path d="M22 33 l7 8 14 -18" fill="none" stroke="#f0431f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
