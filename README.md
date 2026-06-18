@@ -1,5 +1,7 @@
 # SiteAudit — Engagement Report
 
+<img src="assets/seal.svg" align="right" width="200" alt="Stamped score seal — a wobbly Memphis notary stamp reading SCORE 82/100 with passing ticks for SEO, Speed and Security">
+
 **Engagement:** automated first-pass web audit, paid per job, settled and recorded on Arc testnet.
 **Assessor:** an autonomous auditor agent (deterministic scanner, no model in the loop).
 **Subject under test:** any URL the requester names.

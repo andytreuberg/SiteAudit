@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300" role="img" aria-label="SiteAudit stamped score seal: a wobbly Memphis-style notary double-ring stamp reading SCORE 82 of 100 with passing ticks for SEO, Speed and Security">
+  <defs>
+    <!-- hand-drawn wobble, same spirit as the app's #wobble filter -->
+    <filter id="sa-wobble" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- circular path for the curved stamp text -->
+    <path id="sa-arc-top" d="M150 150 m -104 0 a 104 104 0 1 1 208 0" fill="none"/>
+    <path id="sa-arc-bot" d="M150 150 m 104 0 a 104 104 0 0 1 -208 0" fill="none"/>
+  </defs>
+
+  <!-- bubblegum ground tile -->
+  <rect width="300" height="300" rx="20" fill="#f49ed7"/>
+  <!-- faint cream graph-paper -->
+  <g stroke="#fff4e8" stroke-opacity="0.42" stroke-width="1">
+    <path d="M0 50H300M0 100H300M0 150H300M0 200H300M0 250H300"/>
+    <path d="M50 0V300M100 0V300M150 0V300M200 0V300M250 0V300"/>
+  </g>
+
+  <!-- Memphis confetti -->
+  <g filter="url(#sa-wobble)">
+    <circle cx="40" cy="40" r="9" fill="none" stroke="#6c63ff" stroke-width="3.5"/>
+    <path d="M262 32l10 18h-20z" fill="#ff8a3d" stroke="#161112" stroke-width="2.5"/>
+    <path d="M30 258l9-9 9 9-9 9z" fill="#1f8a50" stroke="#161112" stroke-width="2.5"/>
+    <g stroke="#161112" stroke-width="3" stroke-linecap="round"><path d="M258 256l16 0M266 248l0 16"/></g>
+  </g>
+
+  <!-- ===== the stamp ===== -->
+  <g filter="url(#sa-wobble)" transform="rotate(-8 150 150)">
+    <!-- double notary ring -->
+    <circle cx="150" cy="150" r="116" fill="none" stroke="#f0431f" stroke-width="3"/>
+    <circle cx="150" cy="150" r="104" fill="#fff4e8" stroke="#161112" stroke-width="6"/>
+    <circle cx="150" cy="150" r="92"  fill="none" stroke="#161112" stroke-width="2" stroke-dasharray="2 6"/>
+
+    <!-- curved stamp lettering -->
+    <text font-family="'Courier New',ui-monospace,monospace" font-weight="700" font-size="15" letter-spacing="4" fill="#f0431f">
+      <textPath href="#sa-arc-top" startOffset="50%" text-anchor="middle">SITEAUDIT · ON-CHAIN</textPath>
+    </text>
+    <text font-family="'Courier New',ui-monospace,monospace" font-weight="700" font-size="15" letter-spacing="4" fill="#161112">
+      <textPath href="#sa-arc-bot" startOffset="50%" text-anchor="middle">VERIFIED REPORT</textPath>
+    </text>
+
+    <!-- score core -->
+    <text x="150" y="120" text-anchor="middle" font-family="'Courier New',ui-monospace,monospace" font-weight="700" font-size="13" letter-spacing="3" fill="#161112">SCORE</text>
+    <text x="150" y="172" text-anchor="middle" font-family="Arial Black, 'Arial', sans-serif" font-weight="900" font-size="62" fill="#f0431f">82</text>
+    <text x="150" y="192" text-anchor="middle" font-family="'Courier New',ui-monospace,monospace" font-weight="700" font-size="13" letter-spacing="2" fill="#161112">/ 100</text>
+
+    <!-- three sub-score ticks: SEO / Speed / Security (all pass green) -->
+    <g transform="translate(150,214)" font-family="'Courier New',ui-monospace,monospace" font-weight="700" font-size="9.5">
+      <g transform="translate(-66,0)">
+        <circle cx="0" cy="0" r="8" fill="#1f8a50"/>
+        <path d="M-3.5 0l2.5 2.8 4.5-5.2" fill="none" stroke="#fff4e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="0" y="20" text-anchor="middle" fill="#1f8a50">SEO</text>
+      </g>
+      <g transform="translate(0,0)">
+        <circle cx="0" cy="0" r="8" fill="#1f8a50"/>
+        <path d="M-3.5 0l2.5 2.8 4.5-5.2" fill="none" stroke="#fff4e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="0" y="20" text-anchor="middle" fill="#1f8a50">SPEED</text>
+      </g>
+      <g transform="translate(66,0)">
+        <circle cx="0" cy="0" r="8" fill="#1f8a50"/>
+        <path d="M-3.5 0l2.5 2.8 4.5-5.2" fill="none" stroke="#fff4e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="0" y="20" text-anchor="middle" fill="#1f8a50">SEC</text>
+      </g>
+    </g>
+  </g>
+</svg>
