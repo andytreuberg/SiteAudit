@@ -1,114 +1,235 @@
-![SiteAudit — pay a few cents, an agent audits your site, on-chain](docs/cover.png)
+# SiteAudit — Engagement Report
 
-# SiteAudit
+**Engagement:** automated first-pass web audit, paid per job, settled and recorded on Arc testnet.
+**Assessor:** an autonomous auditor agent (deterministic scanner, no model in the loop).
+**Subject under test:** any URL the requester names.
+**Live engagement portal:** https://siteaudit-arc.vercel.app/
+**Ledger of record:** Arc testnet, chain `5042002`.
 
-**Name a URL. Pay a few cents of USDC. An agent scans the site and stamps the report on-chain — before you finish reading this sentence.**
-
-`ARC TESTNET` · `native USDC` · `pay-per-task` · `x402` — live at **siteaudit-arc.vercel.app**
+> This document is laid out the way a real audit deliverable is: scope, method,
+> findings, then how the bill gets settled. The "findings" here are not bugs — they
+> describe how the product behaves. Severity tags (INFO / OBS / CTRL) are reused as
+> shorthand for *how load-bearing* each behaviour is.
 
 ---
 
-### The short version
+## Scope
 
-I've spent thirty years finding what's broken on other people's websites. The first pass is
-always the same handful of things — a missing title, a sluggish first byte, no
-`Content-Security-Policy` — and it has no business costing a consulting day. So I taught a small
-agent to do exactly that pass, and put a coin slot on it.
+What gets assessed, and the boundary of the engagement:
 
-You drop in a URL and **five cents**. The fee doesn't go anywhere yet — it sits in escrow. An
-autonomous agent fetches the page, runs a real scan, scores it out of 100, and **stamps the
-verdict on-chain**: who paid, what was scanned, the score, and a `keccak256` fingerprint of the
-findings. *Only then* does the nickel leave escrow and land in the agent's wallet. No report, no
-payment — your fee is refundable. Work first, money second.
+- **In scope.** A single HTTP `GET` against the named URL, parsed three ways: on-page
+  SEO markup, response timing, and the security response headers. Each produces a
+  0–100 sub-score; the three blend (Security 0.40, SEO 0.30, Speed 0.30) into one
+  headline figure. The verdict, the URL, the payer, and a `keccak256` digest of the
+  report body are written into the contract.
+- **Explicitly out of scope.** No headless browser, no JavaScript execution, no crawl
+  beyond the one page, no Lighthouse-grade rendering audit, no language model
+  generating prose. Every point deducted maps to a named rule in `lib/scan.mjs`. This
+  is a *triage* pass — the cheap, repetitive first look a human consultant does before
+  the meter starts — not a full penetration test.
+- **Trust boundary.** A chain cannot witness that an HTTP fetch occurred; no oracle
+  can. So the contract makes no such claim. It attests only to the money trail and the
+  report commitment — who paid, what URL, the score the agent signed, and that the fee
+  moved *only* against a posted report.
 
-It's the whole pitch of an agent economy in one coin-op: **you don't hire the auditor, you pay it
-per job, and the receipt is a fact on a ledger rather than an invoice in an inbox.**
+The remainder of this report documents the system as the assessed subject.
 
-### What the agent actually checks
+---
 
-One `fetch`, three lenses, no LLM hand-waving — every deduction is a rule you can read:
+## Methodology
 
-- **🔍 SEO** — `<title>` and its length, meta description, a single `<h1>`, viewport, canonical,
-  `lang`, and the Open Graph / Twitter cards that decide how a shared link looks.
-- **⏱ Speed** — wall-clock response time (banded), a healthy 2xx, gzip/br compression, HTML weight,
-  and whether anything is cached or behind a CDN.
-- **🛡 Security** — the headers that actually matter: HTTPS, HSTS, `Content-Security-Policy`,
-  clickjacking protection, `nosniff`, `Referrer-Policy`, `Permissions-Policy`. Each missing one is
-  a finding with a one-line *why it matters*.
+The flow, traced end to end:
 
-Three sub-scores, weight-blended into the headline. Deliberately a *mini*-audit — meta + timing +
-a fistful of headers — not a Lighthouse crawl. Honest about its own scope.
+1. A requester submits a URL and the exact fee via `requestAudit(string url)` — a
+   `payable` call carrying native USDC. The fee is not forwarded anywhere; it is
+   **held in the contract** against a fresh job record (status `Requested`).
+2. At that instant the contract **snapshots the current auditor address into the
+   job**. Whatever the operator does later, *this* fee can only ever release to the
+   agent that was named when the money went in.
+3. The auditor agent picks the job up, fetches the page, runs the deterministic scan,
+   and calls `submitReport(jobId, score, reportUri, reportHash)`. The report JSON is
+   stored **inline** in the job (capped under 1024 bytes); `reportHash` is the
+   `keccak256` of that exact body.
+4. `submitReport` finalises state, then releases the *escrowed* fee to the auditor in
+   one transfer. Effects-before-interaction; a terminal-status guard makes any re-entry
+   a no-op.
+5. If no report lands inside the refund window, the requester calls `refund(jobId)` and
+   reclaims **100%** of the fee. The two exits — auditor-on-delivery, payer-on-timeout —
+   are the only paths funds can take.
 
-### Why this only works on Arc
+The scan rules themselves are catalogued, not improvised: missing `<title>`,
+out-of-range meta description, absent `<h1>` or multiple of them, no responsive
+viewport, missing canonical/`lang`/Open Graph/Twitter tags (SEO); non-2xx status,
+slow time-to-first-byte, no gzip/br, oversized HTML, no cache/CDN headers (Speed);
+no HTTPS, no HSTS, no `Content-Security-Policy`, no clickjacking defence, no
+`nosniff`, no `Referrer-Policy`, no `Permissions-Policy` (Security). Each carries a
+one-line *why it matters*.
 
-A five-cent product dies the instant the toll costs more than the ride. On Arc, **native USDC is
-the gas and the money** — the audit fee, the agent's payout, and the agent's own on-chain write
-are all the same coin. The nickel arrives roughly intact, and an agent grinding a thousand audits
-a day pays each report-write in the currency it just earned, no separate gas tank to babysit. Put
-this on an ETH-gas chain and the fee evaporates into gas; the machine-scale version never starts.
+---
 
-### For agents — the audit is a paid API (x402)
+## Findings
 
-The same job a human buys with a pink button, another agent buys over genuine **x402** (HTTP-402).
-A bot vetting a list of domains pays per scan, no wallet UI:
+Tagged by how central each behaviour is to the design, not by risk.
+
+### CTRL-01 — The fee is held, not trusted
+
+*Control.* `requestAudit` escrows the payment inside `SiteAudit.sol`. No code path lets
+the owner withdraw, sweep, or redirect held funds; there is no treasury address and no
+protocol cut. `escrowOf(jobId)` reports exactly what is being held for an open job, and
+`receive()`/`fallback()` both revert — the contract refuses stray coins, so its balance
+always equals the sum of open jobs. Money leaves only as a payout or a refund.
+
+### CTRL-02 — The agent is bound to the job at payment time
+
+*Control.* The auditor address is copied into the job struct on `requestAudit` and
+`submitReport` pays `j.auditor`, never the live global. `setAuditor` rotates who
+handles *future* jobs and emits `AuditorChanged`; it cannot re-point a fee that is
+already in escrow. This separation — per-job binding versus a mutable global pointer —
+is the single property the whole settlement model rests on.
+
+### CTRL-03 — Release is conditional on a posted report
+
+*Control.* There is no "pay the agent" button. The only function that moves escrow to
+the auditor is `submitReport`, which requires a non-empty report body and a valid
+score (0–100) and rejects anything but the `Requested` status. No report, no payout —
+and after the timeout, the requester takes the money back.
+
+### OBS-01 — The report lives on the ledger, by value
+
+*Observation.* The findings JSON is stored inline in `reportUri`, with `reportHash =
+keccak256(reportUri)` alongside it. Re-hash the body yourself and it matches; there is
+no off-chain pin or bucket to trust or to rot. `getJob(id)` returns the whole record —
+payer, paid amount, timestamp, status, score, bound auditor, URL, report, hash.
+
+### OBS-02 — Tallies are cosmetic
+
+*Observation.* `jobCount`, `reportedCount`, `refundedCount`, and `paidVolume` are
+running counters for the UI. None of them gate a transfer or a state change.
+
+### INFO-01 — Pricing has a floor
+
+*Informational.* `price()` is the current per-audit fee (native USDC, 18 decimals);
+`minPrice` is an *immutable* floor set at deploy. `setPrice` can adjust the fee but can
+never drop it below `minPrice`. `requestAudit` demands the exact current price — no
+over- or underpayment.
+
+---
+
+## Why this engagement is priced for Arc, specifically
+
+Lead with the economics of the work itself. The agent is being paid a handful of cents
+to go *do something external* — reach out across the network, pull a page, parse it,
+and then write its verdict back to the chain. That write is itself a transaction the
+agent pays for. The only way a five-cent job survives is if the fee it collects, the
+balance it spends to post the report, and the payout it ultimately keeps are all
+denominated in **the same native unit** — here, USDC on Arc, which is the chain's own
+transactable asset rather than a wrapped token sitting behind an approval.
+
+Run the identical loop on a chain where the audit is priced in a stablecoin but the
+report-write is settled in a separate volatile fee token, and an agent grinding
+thousands of audits a day has to hold, top up, and price-hedge a second balance just to
+afford writing its own results. The margin on a nickel evaporates into that second
+asset. On Arc the agent earns and spends in one currency, so each completed audit nets a
+predictable few cents and the machine-scale version of this — bots vetting whole lists
+of domains, paying per scan — actually clears. The escrow-with-result model is what
+makes paying an autonomous worker safe; doing it for cents is what makes Arc the place
+it pencils out.
+
+---
+
+## Settlement model
+
+| step | function | who | effect |
+|---|---|---|---|
+| request | `requestAudit(url)` `payable` | requester / buyer agent | fee escrowed, job opened, auditor bound |
+| deliver | `submitReport(id, score, uri, hash)` | bound auditor only | report stored, escrow released to auditor |
+| reclaim | `refund(id)` | payer only, post-timeout | full fee returned, job closed |
+| operate | `setPrice` / `setAuditor` / `transferOwnership` | owner | tune future jobs; never touches open escrow |
+
+States: `Requested → Reported` (agent delivers) or `Requested → Refunded` (payer
+reclaims). Both are terminal. Events `AuditRequested`, `ReportSubmitted`, and
+`AuditRefunded` mark every transition.
+
+**Contract on the ledger:** `0xc131306f4B34425A567E19D04828AB77ebceF672`
+**Inspect it:** https://testnet.arcscan.app/address/0xc131306f4B34425A567E19D04828AB77ebceF672
+
+---
+
+## Refund window
+
+`refundAfter` is fixed at deploy (default 3600 seconds) and **immutable** — the operator
+cannot stretch the window to sit on a requester's money. `isRefundable(jobId)` returns
+true once that window has elapsed on a still-open job; at that point `refund` returns the
+full snapshotted fee to the payer and nothing else. The agent is on a clock: deliver, or
+the work walks.
+
+---
+
+## The auditor agent — verified autonomous
+
+This is a genuine server-side worker with its own funded wallet, not a client-side
+mock.
+
+- `agent/auditor.mjs` — a standalone watcher. It polls `jobCount`, picks up open jobs
+  **bound to its own address**, runs the scan, and submits the report. Run it with
+  `AUDITOR_PK=0x… node agent/auditor.mjs`.
+- `lib/auditor.ts` (`runAudit`) — the same logic, invoked serverlessly. The live site
+  fires `POST /api/scan/:jobId` the moment a payment lands, so reports return in
+  seconds. The call is idempotent: an already-reported job just returns its existing
+  report rather than submitting twice.
+
+Both paths share `lib/scan.mjs` — one fetch, deterministic parsing, identical scoring —
+so the standalone agent and the hosted one cannot disagree.
+
+---
+
+## The audit-as-API channel — real x402
+
+`POST /api/x402/audit` exposes the same engagement to other machines over the genuine
+HTTP-402 wire format, no wallet UI:
 
 ```
-POST /api/x402/audit            →  402  { accepts:[{ network:"eip155:5042002", maxAmountRequired, payTo, asset:native }] }
-requestAudit(url){value:price}  →  tx        (native USDC, escrowed on-chain)
-POST /api/x402/audit            X-PAYMENT: base64({ txHash })
-                                →  200  { score, report, reportTx }   + X-PAYMENT-RESPONSE
+POST /api/x402/audit
+  → 402  { accepts:[{ scheme:"exact", network:"eip155:5042002",
+                       maxAmountRequired, payTo:<contract>, asset:native USDC,
+                       extra:{ method:"requestAudit(string url)" } }] }
+
+requestAudit(url){value:price}              # buyer pays on-chain (native USDC, escrowed)
+
+POST /api/x402/audit   X-PAYMENT: base64({ txHash })
+  → 200  { jobId, url, score, report, reportTx }   + X-PAYMENT-RESPONSE
 ```
 
-**Honest scope:** Arc's USDC is *native* — no ERC-20, no EIP-3009 gasless transfer — so this is
-**pay-then-prove**, not a facilitator settlement. The agent pays *through the contract* and proves
-it with the transaction; the route self-verifies the `AuditRequested` event on-chain and bounds
-replay with a freshness window. Real `402` / `X-PAYMENT` / `X-PAYMENT-RESPONSE` wire format, no
-gasless theatre. Demo: [`agent/audit-demo.mjs`](agent/audit-demo.mjs).
+**Disclosed limitation, stated plainly.** Arc's USDC is the native coin — there is no
+ERC-20 surface and no EIP-3009 gasless transfer — so this is **pay-then-prove**, not a
+facilitator settlement. The buyer pays *through the contract* and presents the
+transaction hash; the route verifies the `AuditRequested` event on-chain, checks the
+amount, and bounds replay with a 300-second freshness window plus a seen-set. The
+status codes and `X-PAYMENT` / `X-PAYMENT-RESPONSE` headers are real; there is no
+gasless theatre and no third-party facilitator. Reference client:
+[`agent/audit-demo.mjs`](agent/audit-demo.mjs).
 
-### The part I won't oversell
+---
 
-A chain can't prove a scan happened — that's true of every oracle ever written. What
-[`SiteAudit.sol`](contracts/SiteAudit.sol) *does* guarantee is the money:
-
-- your fee is **escrowed**, and releases **only** against a posted report — otherwise you reclaim
-  100% after the refund window;
-- the agent that gets paid is **bound to your job at request time**, so the owner can't re-point a
-  later agent at funds you've already escrowed (it's a per-job snapshot, not a mutable global —
-  that was the one real bug two independent adversarial reviews chased down before launch, and it's
-  closed);
-- there is **no admin drain, no protocol fee, no treasury, no withdraw** — every wei that enters
-  has exactly one exit, the auditor on delivery or you on refund;
-- CEI throughout, terminal-status guards, and a `receive`/`fallback` that refuses loose coins so
-  the balance always equals the sum of open jobs.
-
-The report itself is **inline on-chain** (a compact JSON in the job) with a `keccak256` commitment —
-re-hash it yourself, it matches. No IPFS pin to rot, no S3 bucket to trust.
-
-### Run it
+## Reproducing the engagement locally
 
 ```bash
 npm install
-npm run dev          # http://localhost:3000
+npm run dev                      # http://localhost:3000
 
-# the autonomous auditor (its own funded wallet in .env.local):
-node agent/auditor.mjs
-```
+# the autonomous auditor (its own funded key in .env.local):
+AUDITOR_PK=0x… node agent/auditor.mjs
 
-The live site triggers the same agent serverlessly the moment you pay, so an audit lands in
-seconds; `agent/auditor.mjs` is the standalone watcher for anyone who wants to run the agent
-themselves.
-
-### Specs
-
-```
-chain ......... ARC testnet (5042002) · native USDC, 18 decimals
-contract ...... SiteAudit.sol — escrow-with-result, no OpenZeppelin, no admin over funds
-toolchain ..... solc 0.8.35 · paris · optimizer 200 · no viaIR (flatten-verifiable)
-stack ......... Next.js 16 · React 19 · ethers v6 · Tailwind v4
-type ......... Cabinet Grotesk · Crimson Pro · Geist Mono
+# an agent buying an audit over x402, end to end:
+BUYER_PK=0x… CONTRACT=0xc131306f4B34425A567E19D04828AB77ebceF672 \
+  API_BASE=http://localhost:3000 node agent/audit-demo.mjs https://example.com
 ```
 
 ---
 
-*Built in Cologne by Andrew Treuberg. Thirty years of telling people their headers are missing —
-now automated, on-chain, and wearing pink.*
+## Assessor's note
+
+Filed by Andrew Treuberg. I have spent a long career telling site owners that their
+security headers are missing; the finding is almost always the same and rarely worth a
+consulting day. This is that first pass, handed to an agent, billed per job, and signed
+into a ledger instead of an invoice.
